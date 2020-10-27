@@ -1,66 +1,69 @@
-template< class Key, class T>
-HashNode<Key, T>::HashNode(const Key &key, const T &value) :
-        key_(key),
-        value_(value)
-{
+template<class Key, class T, class Hash, class Allocator>
+HashMap<Key, T, Hash, Allocator>::HashNode::HashNode() = default;
 
+template<class Key, class T, class Hash, class Allocator>
+HashMap<Key, T, Hash, Allocator>::HashNode::HashNode(const node_pointer new_node)
+{
+    node_ = new_node;
 }
 
 
-template<class Key, class T>
-bool HashNode<Key, T>::check_key(const Key &key) const
+template<class Key, class T, class Hash, class Allocator>
+Key HashMap<Key, T, Hash, Allocator>::HashNode::get_key() const
 {
-    return key_ == key;
+    return node_->first;
 }
 
 
-template<class Key, class T>
-Key HashNode<Key, T>::get_key() const
+template<class Key, class T, class Hash, class Allocator>
+T HashMap<Key, T, Hash, Allocator>::HashNode::get_value() const
 {
-    return key_;
+    return node_->second;
 }
 
 
-template<class Key, class T>
-T HashNode<Key, T>::get_value() const
-{
-    return value_;
-}
-
-
-template<class Key, class T>
-HashNode<Key, T>* HashNode<Key, T>::get_next() const
+template<class Key, class T, class Hash, class Allocator>
+typename HashMap<Key, T, Hash, Allocator>::HashNode* HashMap<Key, T, Hash, Allocator>::HashNode::get_next() const
 {
     return next_ptr_;
 }
 
 
-template<class Key, class T>
-void HashNode<Key, T>::set_value(const T &value)
+template<class Key, class T, class Hash, class Allocator>
+bool HashMap<Key, T, Hash, Allocator>::HashNode::check_key(const Key &key) const
 {
-    value_ = value;
+    return node_->first == key;
 }
 
 
-template<class Key, class T>
-void HashNode<Key, T>::set_next(const HashNode<Key, T>* next)
+template<class Key, class T, class Hash, class Allocator>
+void HashMap<Key, T, Hash, Allocator>::HashNode::set_value(const T &value)
+{
+    node_->second = value;
+}
+
+
+template<class Key, class T, class Hash, class Allocator>
+void HashMap<Key, T, Hash, Allocator>::HashNode::set_next(HashNode* next)
 {
     next_ptr_ = next;
 }
 
 
-template<class Key, class T>
-HashNode<Key, T>::~HashNode()
+template<class Key, class T, class Hash, class Allocator>
+HashMap<Key, T, Hash, Allocator>::HashNode::~HashNode()
 {
+    delete node_;
     delete next_ptr_;
 }
 
 
 template<class Key, class T, class Hash, class Allocator>
-HashMap<Key, T, Hash, Allocator>::HashMap() :
+HashMap<Key, T, Hash, Allocator>::HashMap(const Allocator &node_allocator) :
         buffer_size_(0),
         size_(0),
-        arr_(nullptr)
+        arr_(nullptr),
+        allocator(node_allocator)
 {
 }
 
@@ -68,9 +71,10 @@ HashMap<Key, T, Hash, Allocator>::HashMap() :
 template<class Key, class T, class Hash, class Allocator>
 HashMap<Key, T, Hash, Allocator>::HashMap(size_t capacity) :
         buffer_size_(capacity),
-        size_(0)
+        size_(0),
+        allocator(Allocator{})
 {
-    arr_ = new HashNode<Key, T>* [buffer_size_];
+    arr_ = new HashNode* [buffer_size_];
 }
 
 
@@ -86,6 +90,9 @@ HashMap<Key, T, Hash, Allocator>::HashMap(const HashMap<Key, T, Hash, Allocator>
     buffer_size_ = other.buffer_size_;
     size_        = other.size_;
     hasher_      = other.hasher_;
+
+    arr_ = new HashNode* [buffer_size_];
+
 }
 
 
