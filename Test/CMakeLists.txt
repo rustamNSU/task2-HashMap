@@ -7,6 +7,3 @@ file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 # Compile executable from source files in SOURCES variable
 add_executable(Test ${SOURCES})
 target_link_libraries(Test googletest)
-
-
-#install (TARGETS LayeredElasticityMatrixUnitTest DESTINATION bin)
